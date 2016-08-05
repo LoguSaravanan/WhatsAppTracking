@@ -28,9 +28,12 @@ import org.slf4j.LoggerFactory;
 public class Tracker {
 	static Logger LOGGER = LoggerFactory.getLogger(Tracker.class);
 	static final String TRACKPERSON = "Bharathy";// case Sensitive
-	static final String COPERSON="Suresh Kali";
+
+	//static final String COPERSON="Suresh Kali";
+	static final String COPERSON="Messiah Pp";
 	// static final String COPERSON="Vignesh Suresh";
 	//static final String COPERSON = "Anbu";
+
 	static final String SCRIPTPATH = "src/main/resources/tracker_from_selenium.js";
 	static WebDriver driver;
 	static String[] trackReport = {};
@@ -48,7 +51,7 @@ public class Tracker {
 
 		LOGGER.info("Logged in...");
 
-		openProfile(wait, TRACKPERSON);
+		//openProfile(wait, TRACKPERSON);
 
 		String trackerScript = null;
 		try {
@@ -73,10 +76,15 @@ public class Tracker {
 				PrintWriter out = new PrintWriter(bw)) {
 			try {
 				boolean toggle = false;
-				int prevLength = 1;
+				int prevLength = 0;
+
+				out.println();
+				out.println("___________________________________________________________________________________________");
+				out.println();
+
 				while (true) {
 					try {
-						Thread.sleep(new Random().nextInt((14000 - 7000) + 1) + 7000);
+						Thread.sleep(new Random().nextInt(3000+ 1) + 7000);
 					} catch (InterruptedException e) {
 						LOGGER.error("Thread Sleep Intereption " + e.getMessage());
 					}
@@ -92,7 +100,7 @@ public class Tracker {
 							.toArray(new String[1]);
 					if (browserReport.length > prevLength) {
 						if (browserReport.length - prevLength > 1) {
-							LOGGER.error("Array Size differs by:" + (browserReport.length - prevLength));
+							LOGGER.warn("Array Size differs by:" + (browserReport.length - prevLength));
 						}
 
 						// browserReport=((ArrayList<String>)
@@ -101,8 +109,8 @@ public class Tracker {
 						// trackReport =browserReport;
 						// LOGGER.info("TrackingReport
 						// :"+Arrays.asList(trackReport).toString());
-						for (int i = browserReport.length - prevLength; i >= 1; i--)
-							out.println(browserReport[browserReport.length - (i + 1)]);
+						for (int i = browserReport.length - prevLength; i > 0; i--)
+							out.println(browserReport[browserReport.length - i]);
 						out.flush();
 						prevLength = browserReport.length;
 					}
@@ -110,6 +118,9 @@ public class Tracker {
 			} catch (WebDriverException e) {
 				out.println("Stopped at:" + new Date().toString());
 				LOGGER.error("WebDriverException Exception in Tracker " + e.getMessage());
+			} catch(Exception e){
+				out.println("Stopped at:" + new Date().toString());
+				LOGGER.error("Exception in Tracker " + e.getMessage());
 			}
 		} catch (IOException e) {
 			LOGGER.error(" Exception in Tracker REpoert File" + e.getMessage());

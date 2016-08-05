@@ -253,9 +253,9 @@ trackingFrequencyInMS=750;
 //alreadyTracking=false;
 
 getTrackerReport=function (){
-  var dummy=lastSeenHistory.concat(trackReport);
-  dummy.push("**** To :"+new Date().format("dd-mmm-yy h:MM:ss TT")+"****");
-  return dummy;
+//  var dummy=lastSeenHistory.concat(trackReport);
+//  dummy.push("**** To :"+new Date().format("dd-mmm-yy h:MM:ss TT")+"****");
+  return trackReport;
 }
 
 function resetTracker() {
@@ -393,8 +393,10 @@ function onlineTracker() {
                 if (chatStatus != lastSeen) {
                     lastSeen = chatStatus;
                     //lastSeenHistory = lastSeenHistory.concat(trackingName, " :", lastSeen, "\n ****************************************\n")
-                    lastSeenHistory.push("".concat(trackingName, " :", lastSeen));
-                    console.info(lastSeenHistory[lastSeenHistory.length-1]);
+                    var lastSeenValueHolder="".concat(trackingName, " :", lastSeen);
+                    lastSeenHistory.push(lastSeenValueHolder);
+                    console.info(lastSeenValueHolder);
+                    trackReport.push(lastSeenValueHolder);
                 }
             }
         }
