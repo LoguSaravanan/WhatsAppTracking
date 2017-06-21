@@ -379,9 +379,11 @@ function onlineTracker() {
         }
       }
       if (document.querySelector('h2.chat-title') != null
-      && null != document.querySelector('div.chat-status:nth-child(2)')) {
+    //  && null != document.querySelector('div.chat-status:nth-child(2)')) {
+      && null != document.querySelector('#main div.chat-secondary')) {  //21-Jun-17
         trackingName = document.querySelector('h2.chat-title > span:nth-child(1)').getAttribute('title').toLowerCase();
-        var chatStatus = document.querySelector('div.chat-status:nth-child(2) > span:nth-child(1)').getAttribute('title').toLowerCase();
+        var chatStatus = document.querySelector('#main div.chat-secondary > span:nth-child(1)').getAttribute('title').toLowerCase(); //21-Jun-17
+      //  var chatStatus = document.querySelector('div.chat-status:nth-child(2) > span:nth-child(1)').getAttribute('title').toLowerCase();
           if ('online' === chatStatus) {
               console.log("Comes Online");
               onlineTime = new Date();
@@ -419,8 +421,8 @@ function offlineTracker() {
       }
         if (document.querySelector('h2.chat-title') != null
         && trackingName === document.querySelector('h2.chat-title > span:nth-child(1)').getAttribute('title').toLowerCase()) {
-            if (null == document.querySelector('div.chat-status:nth-child(2)') ||
-                'online' != document.querySelector('div.chat-status:nth-child(2) > span:nth-child(1)').getAttribute('title').toLowerCase()) {
+            if (null == document.querySelector('#main div.chat-secondary') ||
+                'online' != document.querySelector('#main div.chat-secondary > span:nth-child(1)').getAttribute('title').toLowerCase()) {
                 console.log("Goes Offline");
                 generateReport();
             }
