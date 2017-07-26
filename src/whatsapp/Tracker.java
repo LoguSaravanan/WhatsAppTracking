@@ -20,6 +20,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
@@ -27,12 +29,29 @@ import org.slf4j.LoggerFactory;
 
 public class Tracker {
 	static Logger LOGGER = LoggerFactory.getLogger(Tracker.class);
-	static final String TRACKPERSON = "Bharathy";// case Sensitive
+	static final String TRACKPERSON;
+	static final String COPERSON;
+	static final String COPERSON2;
+	
+	static{
+		if(false){
+			 TRACKPERSON="Suresh Kali";
+			//static final String COPERSON="Messiah Pp";
+			COPERSON="Jio";
 
-	//static final String COPERSON="Suresh Kali";
-	static final String COPERSON="Messiah Pp";
-	// static final String COPERSON="Vignesh Suresh";
-	//static final String COPERSON = "Anbu";
+		//static final String COPERSON="Deena suresh";
+		}
+		else{
+			//COPERSON = "Sha1";
+			COPERSON = "C kumar";
+			COPERSON2 = "Sambu";
+			//TRACKPERSON = "prenesh";
+			//static final String COPERSON="Jio";
+			//static final String COPERSON = "Anbu";
+		TRACKPERSON = "Bharathy";// case Sensitive
+		}
+
+	}
 
 	static final String SCRIPTPATH = "src/main/resources/tracker_from_selenium.js";
 	static WebDriver driver;
@@ -40,13 +59,18 @@ public class Tracker {
 
 	public static void main(String... args) {
 
-		driver = new ChromeDriver();
+		  // Optional, if not specified, WebDriver will search your path for chromedriver.
+		  System.setProperty("webdriver.chrome.driver", "C:/Users/logk/ugoL/Software/chromedriver2.28.exe");
+
+		  driver = new ChromeDriver();
+		//driver = new FirefoxDriver();
+		//driver = new InternetExplorerDriver();
 		driver.manage().window().maximize();
 
 		LOGGER.info("Opening Whatsapp...");
 
 		driver.navigate().to("https://web.whatsapp.com");
-		WebDriverWait wait = new WebDriverWait(driver, 60);
+		WebDriverWait wait = new WebDriverWait(driver, 120);
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"side\"]/div[2]/div/label/input")));
 
 		LOGGER.info("Logged in...");
@@ -71,11 +95,12 @@ public class Tracker {
 		String tName = js.executeScript("return trackingName='" + TRACKPERSON + "';").toString();
 		LOGGER.info("Track Person set to :" + tName);
 
-		try (FileWriter fw = new FileWriter("trackerREport.log", true);
+		try (FileWriter fw = new FileWriter("C:/Users/logk/Google Drive/WA/trackerREport.log", true);
 				BufferedWriter bw = new BufferedWriter(fw);
 				PrintWriter out = new PrintWriter(bw)) {
 			try {
 				boolean toggle = false;
+				boolean toggle2 = false;
 				int prevLength = 0;
 
 				out.println();
@@ -84,12 +109,20 @@ public class Tracker {
 
 				while (true) {
 					try {
-						Thread.sleep(new Random().nextInt(3000+ 1) + 7000);
+						//Thread.sleep(new Random().nextInt(3000+ 1) + 7000);
+						Thread.sleep(7000);
 					} catch (InterruptedException e) {
 						LOGGER.error("Thread Sleep Intereption " + e.getMessage());
 					}
 					if (toggle) {
-						openProfile(wait, COPERSON);
+						if (toggle2) {
+							
+							openProfile(wait, COPERSON);
+							toggle2 = !toggle2;
+						} else {
+							openProfile(wait, COPERSON2);
+							toggle2 = !toggle2;
+						}
 						toggle = !toggle;
 					} else {
 						openProfile(wait, TRACKPERSON);
@@ -110,7 +143,7 @@ public class Tracker {
 						// LOGGER.info("TrackingReport
 						// :"+Arrays.asList(trackReport).toString());
 						for (int i = browserReport.length - prevLength; i > 0; i--)
-							out.println(browserReport[browserReport.length - i]);
+							out.println( new Date().toString()+"  :  " + browserReport[browserReport.length - i]);
 						out.flush();
 						prevLength = browserReport.length;
 					}
@@ -136,7 +169,7 @@ public class Tracker {
 			// case Insensitive
 			// wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"pane-side\"]/div/div/div/div[1]/div/div/div[2]/div[1]/div/span[matches(@title,'"+TRACKPERSON+"','i')]")));
 			wait.until(ExpectedConditions.visibilityOfElementLocated(
-					By.xpath("//*[@id=\"pane-side\"]/div/div/div/div[1]/div/div/div[2]/div[1]/div/span[@title='"
+					By.xpath("//*[@id=\"pane-side\"]/div/div/div/div[2]/div/div/div[2]/div[1]/div/span[@title='"
 							+ trackPerson + "']")));
 			ele.sendKeys(Keys.ENTER);
 
