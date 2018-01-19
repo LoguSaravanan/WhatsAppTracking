@@ -241,14 +241,15 @@ onlineTimerID=undefined;
 offlineTimerID=undefined;
 checkDeviceTimerID=undefined;
 trackReportStr='';
-trackReport =["**** From :"+new Date().format("dd-mmm-yy h:MM:ss TT")+"****"];
+trackReport =["**** From :"+new Date().format("dd-mmm-yy HH:MM:ss TT")+"****"];
 progStartedTime=undefined;
 timeElapsedHr=undefined;
 lastSeen = "";
-lastSeenHistory = [];
+lastSeenHistory = new Map();
 isCheckingDeviceStarted=false;
 disconnectedDeviceType=undefined;
-trackingFrequencyInMS=750;
+trackingFrequencyInMS=100;
+previousTrackName=null;
 //var globalCheckCount = 0;
 //alreadyTracking=false;
 
@@ -260,7 +261,7 @@ getTrackerReport=function (){
 
 function resetTracker() {
     lastSeen = "";
-    lastSeenHistory = [];
+    lastSeenHistory = new Map();;
     trackReport = [];
 }
 
@@ -273,9 +274,9 @@ function printTimersValue(){
 function trackerStatus() {
   console.info("***************************");
     lastSeenHistory.forEach(printArray);
-    console.info("************* From :"+progStartedTime.format("dd-mmm-yy h:MM:ss TT")+"**************\n");
+    console.info("************* From :"+progStartedTime.format("dd-mmm-yy HH:MM:ss TT")+"**************\n");
     trackReport.forEach(printArray);
-    console.info("************* To :"+new Date().format("dd-mmm-yy h:MM:ss TT")+"**************");
+    console.info("************* To :"+new Date().format("dd-mmm-yy HH:MM:ss TT")+"**************");
   //console.info("*************** trackReport From "+progStartedTime+"************ \n".concat(trackReport, "\n "));
 }
 
@@ -333,7 +334,8 @@ function stopCheckingDeviceConn() {
 }
 
 var isDeviceDisconnected=function(){
-  var ele=document.querySelector('.butterbar-title')
+  //var ele=document.querySelector('.butterbar-title') U0cj3
+  var ele=document.querySelector('.U0cj3')
   if(null != ele && ele.innerHTML.toLowerCase().endsWith('not connected') ){
     disconnectedDeviceType=ele.innerHTML.toLowerCase().split(' ',1)[0];
     return true;
@@ -349,7 +351,7 @@ function checkDeviceConnection(){
   var prevDisconnectedDeviceType=disconnectedDeviceType;
   if(isDeviceDisconnected()){
     if (prevDisconnectedDeviceType != undefined && prevDisconnectedDeviceType!=disconnectedDeviceType) {
-      trackReport.push('Device Change :'+disconnectedDeviceType+' Disconnected at :'+new Date().format("dd-mmm-yy h:MM:ss TT"));
+      trackReport.push('Device Change :'+disconnectedDeviceType+' Disconnected at :'+new Date().format("dd-mmm-yy HH:MM:ss"));
       console.info(trackReport[trackReport.length-1]);
     }
     if(!isCheckingDeviceStarted){
@@ -357,14 +359,14 @@ function checkDeviceConnection(){
     stopOfflineTracker();
     startCheckingDeviceConn();
     isCheckingDeviceStarted=true;
-    trackReport.push(disconnectedDeviceType+' Disconnected at :'+new Date().format("dd-mmm-yy h:MM:ss TT"));
+    trackReport.push(getWithExtraSpace(disconnectedDeviceType,8)+' Disconn at :'+new Date().format("dd-mmm-yy HH:MM:ss"));
     console.info(trackReport[trackReport.length-1]);
   }
   }else if(isCheckingDeviceStarted){
     stopCheckingDeviceConn();
     startOnlineTracker();
     isCheckingDeviceStarted=false;
-    trackReport.push(disconnectedDeviceType+'    Connected at :'+new Date().format("dd-mmm-yy h:MM:ss TT"));
+    trackReport.push(getWithExtraSpace(disconnectedDeviceType,8)+' Connect at :'+new Date().format("dd-mmm-yy HH:MM:ss"));
     console.info(trackReport[trackReport.length-1]);
     disconnectedDeviceType=undefined;
   }
@@ -378,35 +380,59 @@ function onlineTracker() {
           return false;
         }
       }
-      if (document.querySelector('h2.chat-title') != null
+     if (document.querySelector('#main') != null
     //  && null != document.querySelector('div.chat-status:nth-child(2)')) {
-      && null != document.querySelector('#main div.chat-secondary')) {  //21-Jun-17
-        trackingName = document.querySelector('h2.chat-title > span:nth-child(1)').getAttribute('title').toLowerCase();
-        var chatStatus = document.querySelector('#main div.chat-secondary > span:nth-child(1)').getAttribute('title').toLowerCase(); //21-Jun-17
+     && null != document.querySelector('#main div.chat-title')) {  //21-Jun-17
+	  
+	  //trackingName = document.querySelector('#main div.chat-secondary > span:nth-child(1)').getAttribute('title').toLowerCase();
+        //trackingName = document.querySelector('#main div.chat-body > div > h2').getAttribute('title').toLowerCase();
+		trackingName = document.querySelector('#main div.chat-title > span').getAttribute('title').toLowerCase();
+		var uniqText=" :In :";
+		if(previousTrackName==null)
+		    previousTrackName=trackingName;
+		else if(previousTrackName==trackingName)
+            uniqText=" ;In :";
+		    else
+		        previousTrackName=trackingName
+
+		
+		// var chatStatus = document.querySelector('#main div.chat-secondary > span:nth-child(1)').getAttribute('title').toLowerCase(); //21-Jun-17
       //  var chatStatus = document.querySelector('div.chat-status:nth-child(2) > span:nth-child(1)').getAttribute('title').toLowerCase();
+		 //var chatStatus = document.querySelector('#main div.chat-subtitle > span').getAttribute('title').toLowerCase(); //21-Jun-17
+		 var chatEle=document.querySelector('#main div.chat-body div:nth-child(2) > span');//4-Oct-17
+		 if(chatEle!=null){
+			var chatStatus = chatEle.getAttribute('title').toLowerCase(); 
+       
           if ('online' === chatStatus) {
-              console.log("Comes Online");
+              //console.log("Comes Online");
               onlineTime = new Date();
               stopOnlineTracker();
               startOfflineTracker();
-              trackReportStr = trackReportStr.concat(trackingName, " : In Time:", onlineTime.format("dd-mmm-yy h:MM:ss TT"));
+              trackReportStr = trackReportStr.concat(getWithExtraSpace(trackingName,10), uniqText, onlineTime.format("dd-mmm-yy HH:MM:ss"));
 
             } else if (chatStatus.startsWith('last seen')) {
                 if (chatStatus != lastSeen) {
                     lastSeen = chatStatus;
                     //lastSeenHistory = lastSeenHistory.concat(trackingName, " :", lastSeen, "\n ****************************************\n")
-                    var lastSeenValueHolder="".concat(trackingName, " :", lastSeen);
-                    lastSeenHistory.push(lastSeenValueHolder);
-                    console.info(lastSeenValueHolder);
-                    trackReport.push(lastSeenValueHolder);
+                    var lastSeenValueHolder="".concat(getWithExtraSpace(trackingName,10), " :", lastSeen);
+					if (lastSeenHistory.get(trackingName) !=lastSeenValueHolder) {
+							lastSeenHistory.set(trackingName,lastSeenValueHolder);
+							trackReport.push(lastSeenValueHolder);
+					}
+                    //lastSeenHistory.push(lastSeenValueHolder);
+                    //console.info(lastSeenValueHolder);
                 }
             }
         }
-        if (new Date() - progStartedTime > (3600000 + (timeElapsedHr * 3600000)))
-            console.info("Program Started at ".concat(progStartedTime, "\n ", ++timeElapsedHr, " Hrs crossed successfully"));
+	}
+	
+     //   if (new Date() - progStartedTime > (3600000 + (timeElapsedHr * 3600000)))
+     //       console.info("Program Started at ".concat(progStartedTime, "\n ", ++timeElapsedHr, " Hrs crossed successfully"));
     } catch (e) {
         console.error("Err in onlineTracker:" + e);
     }
+	//var ads=new Date();
+	//console.info("Online Track ends: "+ ads.getSeconds() +" Sec ,"+ads.getMilliseconds()+" Ms");
 }
 
 function offlineTracker() {
@@ -415,28 +441,30 @@ function offlineTracker() {
       if (isDeviceDisconnected()) {
         checkDeviceConnection();
         if (isCheckingDeviceStarted) {
-          generateReport();
+          generateReport(true);
           return false;
         }
       }
-        if (document.querySelector('h2.chat-title') != null
-        && trackingName === document.querySelector('h2.chat-title > span:nth-child(1)').getAttribute('title').toLowerCase()) {
-            if (null == document.querySelector('#main div.chat-secondary') ||
-                'online' != document.querySelector('#main div.chat-secondary > span:nth-child(1)').getAttribute('title').toLowerCase()) {
-                console.log("Goes Offline");
-                generateReport();
+        if (document.querySelector('#main div.chat-title') != null
+        && trackingName === document.querySelector('#main div.chat-title > span').getAttribute('title').toLowerCase()) {
+            if (null == document.querySelector('#main div.chat-body div:nth-child(2)') ||
+                'online' != document.querySelector('#main div.chat-body div:nth-child(2) > span').getAttribute('title').toLowerCase()) {
+                //console.log("Goes Offline");
+                generateReport(false);
             }
         } else {
-            console.log("Tracking Profile Changed in browser");
-            generateReport();
+            //console.log("Tracking Profile Changed in browser");
+            generateReport(true);
         }
     } catch (e) {
         console.error("Err in OfflineTracker");
-        generateReport();
+        generateReport(true);
     }
+	//var ads=new Date();
+	//console.info("Offline Track ends: "+ ads.getSeconds() +" Sec ,"+ads.getMilliseconds()+" Ms");
 }
 
-function generateReport() {
+function generateReport(isNameChange) {
     try {
       if (!isCheckingDeviceStarted && onlineTimerID==undefined) {
         stopOfflineTracker();
@@ -444,14 +472,21 @@ function generateReport() {
       }
         //console.log("report generations");
         var offlineTime = new Date();
-        trackReportStr = trackReportStr.concat("\t Out Time:", offlineTime.format("dd-mmm-yy h:MM:ss TT"),
-        " \tActive Time:", parseInt((offlineTime - onlineTime) / 1000), "Sec");
+        trackReportStr = trackReportStr.concat("  Out : ", offlineTime.format("dd-mmm-yy HH:MM:ss"),
+        //" \tActive Time:", parseInt((offlineTime - onlineTime) / 1000), "Sec");
+            " \tActive ;", Number.parseFloat((offlineTime - onlineTime) / 1000).toFixed(1), " Sec");
         trackReport.push(trackReportStr);
         trackReportStr='';
-        console.info(trackReport[trackReport.length-1]);
+        //console.info(trackReport[trackReport.length-1]);
     } catch (e) {
         console.error("Err in report:" + e);
     }
+}
+
+function getWithExtraSpace(content,length){ var temp=content;//debugger;
+	for (var i =0 ; i < (length - content.length) ; i++)
+		temp+=" ";
+	return temp;
 }
 
 try {
